@@ -1,0 +1,13 @@
+{"commitInfo":{"timestamp":1600014214324,"operation":"WRITE","operationParameters":{"mode":"Overwrite","partitionBy":"[]"},"readVersion":1,"isBlindAppend":false,"operationMetrics":{"numFiles":"6","numOutputBytes":"2611","numOutputRows":"5"}}}
+{"add":{"path":"part-00000-16829d2b-3de6-48e1-817a-3569410a5774-c000.snappy.parquet","partitionValues":{},"size":296,"modificationTime":1600014213125,"dataChange":true}}
+{"add":{"path":"part-00001-58130e2a-b921-4dc9-a1a7-24f0a85684d7-c000.snappy.parquet","partitionValues":{},"size":463,"modificationTime":1600014213185,"dataChange":true}}
+{"add":{"path":"part-00003-fcc4ee2e-783a-426a-b90a-53589ae6debd-c000.snappy.parquet","partitionValues":{},"size":463,"modificationTime":1600014213185,"dataChange":true}}
+{"add":{"path":"part-00004-25c76eb6-8c62-4840-8d06-3dcf48eb4476-c000.snappy.parquet","partitionValues":{},"size":463,"modificationTime":1600014213185,"dataChange":true}}
+{"add":{"path":"part-00006-7373c074-934b-44d6-826e-f44c4fdc6965-c000.snappy.parquet","partitionValues":{},"size":463,"modificationTime":1600014213185,"dataChange":true}}
+{"add":{"path":"part-00007-7da7972a-3756-40e4-b913-0a3bff88f8ee-c000.snappy.parquet","partitionValues":{},"size":463,"modificationTime":1600014213185,"dataChange":true}}
+{"remove":{"path":"part-00003-aa780548-a771-4f76-9bce-313cd868e9d8-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
+{"remove":{"path":"part-00004-38feb114-de38-48cf-a316-17ffd41bcf56-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
+{"remove":{"path":"part-00006-81102ea9-ec08-49e3-8eaa-1e42a66c86d8-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
+{"remove":{"path":"part-00000-338119cd-e8b9-480e-83f0-f5faead0f6d5-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
+{"remove":{"path":"part-00001-92f65f7a-bfe6-47bc-8201-a256f4d77ad0-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
+{"remove":{"path":"part-00007-955fcdf8-8486-4f98-88fa-4245469b4c43-c000.snappy.parquet","deletionTimestamp":1600014214300,"dataChange":true}}
