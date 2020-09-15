@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/DevTools/aws/jars" />
     <content url="file://$USER_HOME$/DevTools/spark-3.0.1-bin-hadoop2.7/python" />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />

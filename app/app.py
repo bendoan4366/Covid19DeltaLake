@@ -2,6 +2,11 @@ import pyspark.sql
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
 import os
+#Import glue modules
+from awsglue.utils import getResolvedOptions
+from awsglue.context import GlueContext
+from awsglue.dynamicframe import DynamicFrame
+from awsglue.job import Job
 
 conf = SparkConf().setAppName("DeltaNoms").set("spark.delta.logStore.class","org.apache.spark.sql.delta.storage.S3SingleDriverLogStore")
 sc = SparkContext(conf=conf)
