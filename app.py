@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark import SparkContext, SparkConf
 import os
+from read_s3_boto import get_matching_s3_objects, get_matching_s3_keys, get_s3_object_to_df, get_spark_dataframes
 
 sc = SparkContext.getOrCreate()
 
@@ -18,24 +19,19 @@ spark = SparkSession \
 spark.sparkContext.addPyFile(r"C:\Users\kndoa\DevTools\spark-3.0.1-bin-hadoop2.7\jars\delta-core_2.12-0.7.0.jar")
 from delta.tables import *
 
-
 aws_access_key = os.getenv("AWS_ACCESS_KEY")
 aws_secret = os.getenv("AWS_SECRET_ACCESS_KEY_ID")
-
-
-data = spark.range(0, 5)
-#data.write.format("delta").mode(saveMode="overwrite").save(r"C:\Users\kndoa\OneDrive\Desktop\Data_Science\CovidDeltaLake\test")
 
 sc._jsc.hadoopConfiguration().set("fs.s3n.awsAccessKeyId", aws_access_key)
 sc._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", aws_secret)
 sc._jsc.hadoopConfiguration().set("fs.s3n.endpoint", "s3.amazonaws.com")
 
+bucket = "covid19-lake"
+suffix = ".csv"
 
-print("\n"+"\n"+"======================read from s3======================"+"\n"+"\n")
-testing_df = spark.read.json(r"s3n://covid-19-lake/state_totals/*.json")
-testing_df.printSchema()
-testing_df.show(5)
-#data.write.format("delta").save(r"s3n://covid-delta-lake/test/csv_files")
-print("\n"+"\n"+"======================DONE======================"+"\n"+"\n")
+#####fix prefix/suffix dependency
+spark_df = get_spark_dataframes(spark, bucket, "/static-datasets/csv/CountyPopulation/")
 
+spark_df.printSchema()
+spark_df.show(10)
 
