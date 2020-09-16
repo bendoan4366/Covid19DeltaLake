@@ -13,6 +13,7 @@
 from pyspark.sql import SQLContext
 from pyspark.sql import SparkSession
 from py4j.java_gateway import java_import
+
 from awsglue.data_source import DataSource
 from awsglue.data_sink import DataSink
 from awsglue.dynamicframe import DynamicFrame, DynamicFrameReader, DynamicFrameWriter, DynamicFrameCollection
@@ -23,6 +24,8 @@ import os
 import re
 import uuid
 from py4j.java_gateway import JavaClass
+import time
+import logging
 
 def register(sc):
     java_import(sc._jvm, "com.amazonaws.services.glue.*")
@@ -34,7 +37,6 @@ def register(sc):
     java_import(sc._jvm, "com.amazonaws.services.glue.util.AWSConnectionUtils")
     java_import(sc._jvm, "com.amazonaws.services.glue.util.GluePythonUtils")
     java_import(sc._jvm, "com.amazonaws.services.glue.errors.CallSite")
-
 
 class GlueContext(SQLContext):
     Spark_SQL_Formats = {"parquet", "orc"}
@@ -199,7 +201,7 @@ class GlueContext(SQLContext):
                            connection_options={}, format={}, format_options={},
                            transformation_ctx = "", **kwargs):
         if isinstance(frame_or_dfc, DynamicFrameCollection):
-            new_options = dict(connection_options.items()
+            new_options = dict(list(connection_options.items())
                                + [("useFrameName", True)])
         elif isinstance(frame_or_dfc, DynamicFrame):
             new_options = connection_options
@@ -269,7 +271,7 @@ class GlueContext(SQLContext):
     def write_from_jdbc_conf(self, frame_or_dfc, catalog_connection, connection_options={},
                              redshift_tmp_dir = "", transformation_ctx = "", catalog_id = None):
         if isinstance(frame_or_dfc, DynamicFrameCollection):
-            new_options = dict(connection_options.items()
+            new_options = dict(list(connection_options.items())
                                + [("useFrameName", True)])
         elif isinstance(frame_or_dfc, DynamicFrame):
             new_options = connection_options
@@ -393,3 +395,4 @@ class GlueContext(SQLContext):
 
     def get_logger(self):
         return self._glue_logger
+

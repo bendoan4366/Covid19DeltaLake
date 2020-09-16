@@ -10,56 +10,51 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-from awsglue.transforms import DropFields, GlueTransform
+from awsglue.transforms import GlueTransform
 
-class ApplyMapping(GlueTransform):
-    def __call__(self, frame, mappings, case_sensitive = False,
-                 transformation_ctx = "", info = "", stageThreshold = 0, totalThreshold = 0):
-        return frame.apply_mapping(mappings, case_sensitive)
+class Union(GlueTransform):
+    def __call__(self, frame1, frame2, transformation_ctx = "",
+                 info = "", stageThreshold = 0, totalThreshold = 0):
+        return frame1.union(mappings, case_sensitive)
 
     @classmethod
     def describeArgs(cls):
-        arg1 = {"name": "frame",
+        arg1 = {"name": "frame1",
                 "type": "DynamicFrame",
-                "description": "DynamicFrame to transform",
+                "description": "First DynamicFrame to union.",
                 "optional": False,
                 "defaultValue": None}
-        arg2 = {"name": "mappings",
+        arg2 = {"name": "frame2",
                 "type": "DynamicFrame",
-                "description": "List of mapping tuples (source col, source type, target col, target type)",
+                "description": "Second DynamicFrame to union.",
                 "optional": False,
                 "defaultValue": None}
-        arg3 = {"name": "case_sensitive",
-                "type": "Boolean",
-                "description": "Whether ",
-                "optional": True,
-                "defaultValue": "False"}
-        arg4 = {"name": "transformation_ctx",
+        arg3 = {"name": "transformation_ctx",
                 "type": "String",
                 "description": "A unique string that is used to identify stats / state information",
                 "optional": True,
                 "defaultValue": ""}
-        arg5 = {"name": "info",
+        arg4 = {"name": "info",
                 "type": "String",
                 "description": "Any string to be associated with errors in the transformation",
                 "optional": True,
                 "defaultValue": "\"\""}
-        arg6 = {"name": "stageThreshold",
+        arg5 = {"name": "stageThreshold",
                 "type": "Integer",
                 "description": "Max number of errors in the transformation until processing will error out",
                 "optional": True,
                 "defaultValue": "0"}
-        arg7 = {"name": "totalThreshold",
+        arg6 = {"name": "totalThreshold",
                 "type": "Integer",
                 "description": "Max number of errors total until processing will error out.",
                 "optional": True,
                 "defaultValue": "0"}
 
-        return [arg1, arg2, arg3, arg4, arg5, arg6, arg7]
+        return [arg1, arg2, arg3, arg4, arg5, arg6]
 
     @classmethod
     def describeTransform(cls):
-        return "Apply a declarative mapping to this DynamicFrame."
+        return "Union two DynamicFrames."
 
     @classmethod
     def describeErrors(cls):
@@ -68,4 +63,4 @@ class ApplyMapping(GlueTransform):
     @classmethod
     def describeReturn(cls):
         return {"type": "DynamicFrame",
-                "description": "DynamicFrame after applying mappings."}
+                "description": "DynamicFrame containing all records from both input DynamicFrames."}

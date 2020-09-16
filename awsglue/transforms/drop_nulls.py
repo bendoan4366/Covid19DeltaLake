@@ -10,18 +10,42 @@
 # or implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
-from transform import GlueTransform
+from __future__ import print_function
+from awsglue.transforms import DropFields, GlueTransform
+from awsglue.gluetypes import ArrayType, NullType, StructType
 
-class Repartition(GlueTransform):
-    def __call__(self, frame, num_partitions, transformation_ctx = "", info = "",
-                 stageThreshold = 0, totalThreshold = 0):
-        return frame.repartition(num_partitions, transformation_ctx, info, stageThreshold, totalThreshold)
+class DropNullFields(GlueTransform):
+    def _find_null_fields(self, ctx, schema, path, output):
+        if isinstance(schema, StructType):
+            for field in schema:
+                new_path = path + "." if path != "" else path
+                self._find_null_fields(ctx, field.dataType, new_path + ctx._jvm.RecordUtils.quoteName(field.name), output)
+
+        elif isinstance(schema, ArrayType):
+            # For the moment we only remove null fields in nested array columns.
+            # We don't change ArrayType(NullType).
+            if isinstance(schema.elementType, StructType):
+                self._find_null_fields(ctx, schema.elementType, path, output)
+
+        elif isinstance(schema, NullType):
+            output.append(path)
+
+        # Note: dropFields currently does not work through maps,
+        # so neither does DropNullFields
+
+    def __call__(self, frame, transformation_ctx = "", info = "", stageThreshold = 0, totalThreshold = 0):
+        null_fields = []
+        self._find_null_fields(frame.glue_ctx, frame.schema(), "", null_fields)
+        print("null_fields", null_fields)
+
+        return DropFields.apply(frame, null_fields, transformation_ctx,
+                                info, stageThreshold, totalThreshold)
 
     @classmethod
     def describeArgs(cls):
-        arg1 = {"name": "num_partitions",
+        arg1 = {"name": "frame",
                 "type": "DynamicFrame",
-                "description": "Number of partitions",
+                "description": "Drop all null fields in this DynamicFrame",
                 "optional": False,
                 "defaultValue": None}
         arg2 = {"name": "transformation_ctx",
@@ -49,7 +73,7 @@ class Repartition(GlueTransform):
 
     @classmethod
     def describeTransform(cls):
-        return "Repartitions a DynamicFrame."
+        return "Drop all null fields in this DynamicFrame"
 
     @classmethod
     def describeErrors(cls):
@@ -58,4 +82,4 @@ class Repartition(GlueTransform):
     @classmethod
     def describeReturn(cls):
         return {"type": "DynamicFrame",
-                "description": "The repartitioned DynamicFrame."}
+                "description": "DynamicFrame without null fields."}
