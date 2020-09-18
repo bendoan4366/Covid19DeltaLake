@@ -27,11 +27,23 @@ sc._jsc.hadoopConfiguration().set("fs.s3n.awsSecretAccessKey", aws_secret)
 sc._jsc.hadoopConfiguration().set("fs.s3n.endpoint", "s3.amazonaws.com")
 
 bucket = "covid19-lake"
-suffix = ".csv"
+print("\n" + "df_county_populations - starting...." + "\n")
+df_county_populations = get_spark_dataframes(spark, bucket,  "static-datasets/csv/CountyPopulation", ".csv", "csv")
+print("\n" + "df_county_populations - done" + "\n")
 
-#####fix prefix/suffix dependency
-spark_df = get_spark_dataframes(spark, bucket, "/static-datasets/csv/CountyPopulation/")
+print("\n" + "df_county_cases - starting...." + "\n")
+df_county_cases = get_spark_dataframes(spark, bucket, "rearc-covid-19-nyt-data-in-usa/csv/us-counties", ".csv", "csv")
+print("\n" + "df_county_cases - done...." + "\n")
 
-spark_df.printSchema()
-spark_df.show(10)
+print("\n" + "state_testing - starting...." + "\n")
+df_state_tests = get_spark_dataframes(spark, bucket, "rearc-covid-19-testing-data/json/states_daily", ".json", "json")
+print("\n" + "state_testing - done...." + "\n")
 
+df_county_populations.printSchema()
+df_county_populations.show(10)
+
+df_county_cases.printSchema()
+df_county_cases.show(10)
+
+df_state_tests.printSchema()
+df_state_tests.show(10)

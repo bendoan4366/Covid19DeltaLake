@@ -2,6 +2,9 @@ import boto3
 import pandas as pd
 from pyspark import SparkContext, SparkConf
 import pyspark.sql
+from io import StringIO
+
+from pyspark.sql import SparkSession
 
 client = boto3.client("s3")
 paginator = client.get_paginator("list_objects_v2")
@@ -9,7 +12,6 @@ paginator = client.get_paginator("list_objects_v2")
 def get_matching_s3_objects(bucket, prefix="", suffix=""):
     """
     Generate objects in an S3 bucket.
-
     :param bucket: Name of the S3 bucket.
     :param prefix: Only fetch objects whose key starts with
         this prefix (optional).
@@ -46,29 +48,36 @@ def get_matching_s3_objects(bucket, prefix="", suffix=""):
 def get_matching_s3_keys(bucket, prefix="", suffix=""):
     """
     Generate the keys in an S3 bucket.
-
     :param bucket: Name of the S3 bucket.
     :param prefix: Only fetch keys that start with this prefix (optional).
     :param suffix: Only fetch keys that end with this suffix (optional).
     """
     for obj in get_matching_s3_objects(bucket, prefix, suffix):
-        yield obj["Key"]
+        return obj["Key"]
 
 
-def get_s3_object_to_df(bucket, key):
+def get_s3_object_to_df(bucket, key, format):
     s3 = boto3.resource('s3')
     obj = s3.Object(bucket, key)
     body = obj.get()['Body'].read()
 
-    json_string = bytes.decode(body)
-    df = pd.read_json(json_string, lines=True)
+    object_string = bytes.decode(body)
+
+    if format == "json":
+        df = pd.read_json(object_string, lines=True)
+    elif format == "csv":
+        csv_data = StringIO(object_string)
+        df = pd.read_csv(csv_data)
+    else:
+        print("invalid format, specify csv or json. Future data structures to come..")
 
     return df
 
 
-def get_spark_dataframes(spark_session, bucket, key):
-    item_key = get_matching_s3_keys(bucket, key)
-    df = get_s3_object_to_df(bucket, key)
+def get_spark_dataframes(spark_session, bucket, prefix, suffix, format):
+
+    item_key = get_matching_s3_keys(bucket, prefix, suffix)
+    df = get_s3_object_to_df(bucket, item_key, format)
 
     spark_df = spark_session.createDataFrame(df)
 
