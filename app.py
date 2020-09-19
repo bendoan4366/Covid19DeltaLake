@@ -47,3 +47,6 @@ df_county_cases.show(10)
 
 df_state_tests.printSchema()
 df_state_tests.show(10)
+
+
+df_county_populations.write.format("parquet").save("s3n://covid-delta-lake/test")
