@@ -63,21 +63,21 @@ time_table_create = ("""CREATE TABLE IF NOT EXISTS time(
 #Copy Table Queries
 copy_table_cases = ("""
     COPY covid_cases
-    FROM 's3://covid-delta-lake/delta/cases/parquets'
+    FROM 's3://covid-delta-lake/delta/cases/'
     IAM_ROLE '{}'
     FORMAT AS PARQUET;
     """).format(config.get("IAM_ROLE", "ARN"))
 
 copy_table_tests = ("""
     COPY covid_tests 
-    FROM 's3://covid-delta-lake/delta/tests/parquets'
+    FROM 's3://covid-delta-lake/delta/tests/'
     IAM_ROLE '{}'
     FORMAT AS PARQUET;
     """).format(config.get("IAM_ROLE", "ARN"))
 
 copy_table_population = ("""
     COPY populations 
-    FROM 's3://covid-delta-lake/delta/populations/parquets'
+    FROM 's3://covid-delta-lake/delta/populations/'
     IAM_ROLE '{}' 
     FORMAT AS PARQUET;
     """).format(config.get("IAM_ROLE", "ARN"))
