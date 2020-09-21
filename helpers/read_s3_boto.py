@@ -57,6 +57,13 @@ def get_matching_s3_keys(bucket, prefix="", suffix=""):
 
 
 def get_s3_object_to_df(bucket, key, format):
+    """
+    given a bucket, key and format, extracts body from the s3 object, and converts to pandas dataframe
+
+    param bucket: Name of the S3 bucket.
+    param key: key for object in s3, generated from invoking get_matching_s3_keys
+    param format: format of the data being read from body of object (currently csv and json are the only two supported)
+    """
     s3 = boto3.resource('s3')
     obj = s3.Object(bucket, key)
     body = obj.get()['Body'].read()
@@ -75,7 +82,15 @@ def get_s3_object_to_df(bucket, key, format):
 
 
 def get_spark_dataframes(spark_session, bucket, prefix, suffix, format):
+    """
+    invokes all functions above to locate an item in s3, extract the key, extract the contents, and write to a spark dataframe
 
+    param spark_session: Name of spark session
+    param bucket: Name of the S3 bucket.
+    param prefix: Only fetch keys that start with this prefix (optional).
+    param suffix: Only fetch keys that end with this suffix (optional).
+    param format: format of the data being read from body of object (currently csv and json are the only two supported)
+    """
     item_key = get_matching_s3_keys(bucket, prefix, suffix)
     df = get_s3_object_to_df(bucket, item_key, format)
 
