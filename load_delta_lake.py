@@ -27,17 +27,21 @@ spark.sparkContext._jsc.hadoopConfiguration().set("fs.s3n.endpoint", "s3.amazona
 
 bucket = "covid19-lake"
 
+df_state_codes = spark.read.option("header", True).csv("s3n://covid-delta-lake/static/*.csv")
+df_state_codes = df_state_codes.withColumnRenamed("State", "state_full")
+
 df_county_populations = get_spark_dataframes(spark, bucket,  "static-datasets/csv/CountyPopulation", ".csv", "csv")
 df_county_populations = df_county_populations.withColumnRenamed("Population Estimate 2018", "2018_pop_estimate")
 print("\n" + "df_county_populations - done" + "\n")
 
 df_county_cases = get_spark_dataframes(spark, bucket, "rearc-covid-19-nyt-data-in-usa/csv/us-counties", ".csv", "csv")
+df_county_cases = df_county_cases.join(df_state_codes.select("state_full", "Code"), df_state_codes["state_full"] == df_county_cases["state"], "inner").select("date", "county", "state_full", "fips", "cases", "deaths", "code")
 print("\n" + "df_county_cases - done...." + "\n")
 
 df_state_tests = get_spark_dataframes(spark, bucket, "rearc-covid-19-testing-data/json/states_daily", ".json", "json")
 print("\n" + "state_testing - done...." + "\n")
 
 from delta.tables import *
-df_county_populations.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/test/populations")
-df_state_tests.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/test/tests")
-df_county_cases.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/test/cases")
+df_county_populations.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/delta/populations")
+df_state_tests.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/delta/tests")
+df_county_cases.write.format("delta").mode("overwrite").save("s3n://covid-delta-lake/delta/cases")
