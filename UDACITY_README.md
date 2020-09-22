@@ -16,7 +16,7 @@ The current data sources for this data lake include:
 
 The data dictionary for these sources can be found in the data_dictionary.md file. These sources are current as of 9/22/2020, but will expand as time goes on.
 
-## Tools and Technologies
+### Tools and Technologies
 For this project, Delta Lake 0.7.0, Spark 3.0, AWS s3, and Amazon Redshift were selected in order handle that large and diverse dataset. Rationale for the tool selection can be found below:
 - [Delta Lake](https://delta.io/) is an open source, next-generation data lake tool that brings ACID transactions to Apache Spark. It was selected due to its ability to handle a wide array of incoming data types, and its efficient handling of meta-data, data compression to parquet, as well as ability to handle schema evolution. These 3 factors will be critical as the dataset grows in both volume and variety of data, as schemas for the respective Delta Tables will almost definitely change over time.
 - [Spark 3.0](https://spark.apache.org/docs/latest/) was implemented as a requirement of Delta Lake, but also because of its ability to wrangle, transform, and process a wide variety of data sources in a big data context
@@ -25,8 +25,9 @@ For this project, Delta Lake 0.7.0, Spark 3.0, AWS s3, and Amazon Redshift were 
 
 ## 2. Explore and Assess Data
 
-
-
+For full EDA analysis, please see the [EDA.ipynb](https://github.com/bendoan4366/covid_19_delta_lake/blob/master/helpers/EDA.ipynb) under the [helpers directory](https://github.com/bendoan4366/covid_19_delta_lake/tree/master/helpers)
+<br>
+<br>
 ## 3. Define Data Model
 Data model was designed for quick read/writes, and allows the users to enrich the <code>covid_cases</code> and <code>covid_tests</code> fact tables, using the <code>population</code> and <code>time</code> dim tables. 
 
@@ -36,16 +37,16 @@ With this data model, users will be able to analyze trends in tests, positive ca
 
 ## 4. ETL and Data Modeling
 
-## Scripts and Process
+### Scripts and Process
 For this project, Spark and Boto3 are leveraged to extract the data from its source location and write the data to S3 in parquet/delta format. From there, a python ETL script is also made available to load the Delta Lake data to Amazon Redshift for analysis.
 
 The following scripts and helper scripts facilitate this process:
 
-### Main Scripts:
+#### Main Scripts:
 - **load_delta_lake.py**: PySpark Script that reads data from the various sources and writes to a Delta Lake s3 bucket by leveraging helper functions in the <code>read_s3_boto.py</code>.
 - **etl.py**: Copies data from Delta Lake s3 Bucket, by invoking helper queries in the <code>sql_queries.py</code> file, and then writes parsed data to an Amazon Redshift Data Warehouse with the following schema:
 
-### Helper Scripts
+#### Helper Scripts
 - **sql_queries.py**: Defines drop, create, copy, and load table queries to extract data from Delta Lake s3 bucket into redshift
 - **read_s3_boto**: Leverages Boto3 to interact with s3 buckets that contain source datasets from the NIH and Rearc/NYT. This tool was implemented due to iteroperability issues between the datasources and the new Spark 3.0, but may be depreciated as the bugs are resolved.
 - **dwh.cfg**: Config file that contains connection parameters to the Redshift data warehouse
