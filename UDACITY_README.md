@@ -1,9 +1,12 @@
   # Covid-19 Delta Lake Project - Udacity README
 
-## Purpose
+
+## 1: Scope the Project and Gather Data
+
+### Scope
 The purpose of this project is to prototype [Delta Lake](https://delta.io/), as a means of developing a lightweight, next-generation data lake for publically available Covid-19 data. 
 
-As the Covid-19 situation continues to progress throughout the world, creating a centralized data repository for timely analysis can be crucial to detecting new outbreaks or at-risk areas. This projects aims to accomplish that by aggregating several datasources into a single, easily accessible, lightweight format. 
+As the Covid-19 situation continues to progress throughout the world, creating a centralized data repository for timely analysis can be crucial to detecting new outbreaks or at-risk areas. This projects aims to accomplish that by aggregating several datasources around positive cases, tests, hospitalizations, and deaths over time. In addition, dimensional data on U.S. counties will be provided to enrich analysis and allow for per-capita contextualization of analysis.
 
 The current data sources for this data lake include:
 
@@ -11,7 +14,7 @@ The current data sources for this data lake include:
 - [Rearc Coronavirus (COVID-19) Testing by US State](https://aws.amazon.com/marketplace/pp/Coronavirus-COVID-19-Data-in-the-United-States-The/prodview-jmb464qw2yg74#overview) dataset, also made available in NIH public Covid datalake
 - [NIH County Population 2018 Static Dataset](https://dj2taa9i652rf.cloudfront.net/)
 
-These sources are current as of 9/21/2020, but will expand as time goes on.
+The data dictionary for these sources can be found in the data_dictionary.md file. These sources are current as of 9/22/2020, but will expand as time goes on.
 
 ## Tools and Technologies
 For this project, Delta Lake 0.7.0, Spark 3.0, AWS s3, and Amazon Redshift were selected in order handle that large and diverse dataset. Rationale for the tool selection can be found below:
@@ -20,17 +23,18 @@ For this project, Delta Lake 0.7.0, Spark 3.0, AWS s3, and Amazon Redshift were 
 - [AWS s3](https://aws.amazon.com/s3/) was used as a storage layer due to its interoperability with Spark, as well as its easy to access interface. Additionally, configuring read/write permissions to the Delta Lake is made easier using AWS access controls for s3
 - [Amazon RedShift](https://aws.amazon.com/redshift/) is an optional  component to this project, that allows users to quickly stand up a data warehouse to quickly query and analyze the dataset on an ad-hoc basis. Its easy and cost-effective implementation and interoperability with s3 make it a good choice for effective querying or analysis of Delta Lake data 
 
-## Data Model
+## 2. Explore and Assess Data
+
+
+
+## 3. Define Data Model
 Data model was designed for quick read/writes, and allows the users to enrich the <code>covid_cases</code> and <code>covid_tests</code> fact tables, using the <code>population</code> and <code>time</code> dim tables. 
 
 ![schema](images/warehouse_schema.png)
 
 With this data model, users will be able to analyze trends in tests, positive cases, and deaths at both a county and state level over time. Additionally, including county populations data will allow users to normalize trends as a proportion of county/regional/state populations, allowing for more contextualized data.
 
-## Additional Considerations
-- **Data Growth:** As the dataset grows in size, we may consider moving this project to an [**AWS EMR cluster**](https://aws.amazon.com/emr/), which allows for horizontal scaling of pre-configured Hadoop/Spark Environments, to accomodate a data volumes up to 100x the current size. Currently, the dataset is small enough that Spark scripts can be run locally, but that is subject to change as additional datasets are added or as the dataset grows in size. Use of AWS EMR will be reassessed during that time.
-- **Pipeline Scheduling:** Updates are currently run manually, by submitting the <code>load_delta_lake.py</code> spark script and running the <code>etl.py</code> on an ad-hoc basis. However, as the need for automated updates grow, the team may consider implementing [Apache Airflow](https://airflow.apache.org/), and refactoring the <code>load_delta_lake</code> functions into Spark operators, as well as refactoring the <code>etl</code> and <code>read_s3_boto</code> functions into s3, Redshift/Postgres, and Python operators.
-- **Database/Datalake Access**: This script is developed to allow each user to stand up his/her own Delta Lake for analysis. However, in the case that a single Delta Lake requires multiple users to access it, the s3 bucket access can be configured to allow different users read access to the data on a relatively low-cost basis. As for the Redshift warehouse, access can be granted to multiple users by creating an [AWS Redshift Security Group](https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-security-groups.html). Please note that Redshift cluster charges may increase as more users make calls to Redshift, or as compute requirements increase as more users access the data warehouse. 
+## 4. ETL and Data Modeling
 
 ## Scripts and Process
 For this project, Spark and Boto3 are leveraged to extract the data from its source location and write the data to S3 in parquet/delta format. From there, a python ETL script is also made available to load the Delta Lake data to Amazon Redshift for analysis.
@@ -46,7 +50,7 @@ The following scripts and helper scripts facilitate this process:
 - **read_s3_boto**: Leverages Boto3 to interact with s3 buckets that contain source datasets from the NIH and Rearc/NYT. This tool was implemented due to iteroperability issues between the datasources and the new Spark 3.0, but may be depreciated as the bugs are resolved.
 - **dwh.cfg**: Config file that contains connection parameters to the Redshift data warehouse
 
-## Prequisites
+### Prequisites
 To implement this datalake, you must have the following tools set up in your development environment:
 - Spark 3.0
 - Delta Lake 0.7.0
@@ -60,7 +64,14 @@ To create and populate the Redshift data warehouse, the following steps must com
 2. Create IAM role with S3 read access
 3. Populate the dwh.cfg file with the correct database credentials and IAM ARN
 
-## Instructions
+### Instructions
 
 1. Once the environment set up, <code>spark-submit</code> the <code>load_delta_lake.py</code> file to populate the Delta Lake
 2. Once the spark script is complete, run the <code>etl.py</code> file as standard python file to copy the data into Redshift  
+
+## 5. Additional Scenario Considerations
+- **If the data was increased by 100x:** As the dataset grows in size, we may consider moving this project to an [**AWS EMR cluster**](https://aws.amazon.com/emr/), which allows for horizontal scaling of pre-configured Hadoop/Spark Environments, to accomodate a data volumes up to 100x the current size. Currently, the dataset is small enough that Spark scripts can be run locally, but that is subject to change as additional datasets are added or as the dataset grows in size. Use of AWS EMR will be reassessed during that time.
+- **If the pipelines were run on a daily basis by 7am:** Updates are currently run manually, by submitting the <code>load_delta_lake.py</code> spark script and running the <code>etl.py</code> on an ad-hoc basis. However, as the need for automated updates grow, the team may consider implementing [Apache Airflow](https://airflow.apache.org/), and refactoring the <code>load_delta_lake</code> functions into Spark operators, as well as refactoring the <code>etl</code> and <code>read_s3_boto</code> functions into s3, Redshift/Postgres, and Python operators.
+- **If the database needed to be accessed by 100+ people.**: This script is developed to allow each user to stand up his/her own Delta Lake for analysis. However, in the case that a single Delta Lake requires multiple users to access it, the s3 bucket access can be configured to allow different users read access to the data on a relatively low-cost basis. As for the Redshift warehouse, access can be granted to multiple users by creating an [AWS Redshift Security Group](https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-security-groups.html). Please note that Redshift cluster charges may increase as more users make calls to Redshift, or as compute requirements increase as more users access the data warehouse. 
+
+
