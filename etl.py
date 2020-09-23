@@ -2,11 +2,11 @@ import configparser
 import psycopg2
 from sql_queries import copy_table_queries, create_table_queries, drop_table_queries
 
-host="******.******.us-west-2.redshift.amazonaws.com"
-db_name="******"
-user="******"
-pw="******"
-port= "******"
+host="[*********************]"
+db_name="[*********************]"
+user="[*********************]"
+pw="[*********************]"
+port= "[*********************]"
 
 def create_tables(cur, conn):
     """
@@ -39,7 +39,7 @@ def insert_tables(cur, conn):
         cur.execute(query)
         conn.commit()
 
-def data_quality_check(tables, cur, conn):
+def table_count_quality_check(tables, cur, conn):
     """
     Performs quality checks to ensure that data has been loaded in Redshift correctly
 
@@ -55,9 +55,37 @@ def data_quality_check(tables, cur, conn):
         cur.execute(f"select count(*) from {table}")
         result = cur.fetchall()
         if result[0][0] > 1:
-            print("Data quality inspection passed")
+            print(f"Data quality inspection passed for {table}")
         else:
-            raise ValueError(f"QA failed for {table}: Table contained 0 rows")
+            raise ValueError(f"QA failed for {table}: Table contained 0 rows. Please clear all Redshit tables and re-run script")
+        conn.commit()
+
+def time_table_quality_check(cur, conn):
+    """
+    Performs quality checks to ensure that data has been loaded in Redshift correctly
+
+    Takes 3 arguments:
+    - cur: cursor object that points to Redshift database
+    - conn: psycopg2 connection to Redshift database
+    Output:
+    - validates that data is loaded into Redshift database
+    """
+
+    cur.execute(f"select MAX(year), MIN(year) from time")
+
+    result = cur.fetchall()
+    max_year = result[0][0]
+    min_year = result[0][1]
+
+    if max_year <= 2022:
+        if min_year >= 2019:
+            print(f"Datetime QA passed for time table. Year ranges are within acceptable range.")
+        else:
+            raise ValueError(f"QA failed for time check. The minimum year value returned was {min_year}, which is outside the time range")
+    else:
+        raise ValueError(f"QA failed for time check. The maximum year value returned was {max_year}, which is outside the time range")
+
+    conn.commit()
 
 def main():
     """
@@ -80,8 +108,8 @@ def main():
     insert_tables(cur, conn)
     print("successfully inserted tables")
 
-    data_quality_check(["covid_tests", "covid_cases", "populations", "time"], cur, conn)
-    print("completed data quality check")
+    table_count_quality_check(["covid_tests", "covid_cases", "populations", "time"], cur, conn)
+    time_table_quality_check(cur, conn)
 
     conn.close()
 
