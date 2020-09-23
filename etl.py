@@ -62,13 +62,13 @@ def table_count_quality_check(tables, cur, conn):
 
 def time_table_quality_check(cur, conn):
     """
-    Performs quality checks to ensure that data has been loaded in Redshift correctly
+    Performs check on time table to ensure dates were parse correctly from fact tables
 
     Takes 3 arguments:
     - cur: cursor object that points to Redshift database
     - conn: psycopg2 connection to Redshift database
     Output:
-    - validates that data is loaded into Redshift database
+    - validates dates are within acceptable yearly range (2019-2021)
     """
 
     cur.execute(f"select MAX(year), MIN(year) from time")
