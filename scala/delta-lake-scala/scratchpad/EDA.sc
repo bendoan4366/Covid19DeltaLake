@@ -2,7 +2,7 @@ import scala.util.Properties
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{DateType, IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DateType, DoubleType, IntegerType, StringType, StructField, StructType}
 
 val spark = SparkSession
   .builder()
@@ -19,6 +19,8 @@ spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", aws_access_key)
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
 spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
 
+
+
 val cases_schema = StructType(
   List(
     StructField("date", DateType),
@@ -27,6 +29,17 @@ val cases_schema = StructType(
     StructField("fips", StringType),
     StructField("cases", IntegerType),
     StructField("deaths", IntegerType),
+  )
+)
+
+val prediction_schema = StructType(
+  List(
+    StructField("countyfips", DateType),
+    StructField("countyname", StringType),
+    StructField("predicted_date", DateType),
+    StructField("predicted_deaths", DoubleType),
+    StructField("severity_county_5-day", DoubleType),
+    StructField("statename", StringType),
   )
 )
 
@@ -40,4 +53,9 @@ val df_testing_data = spark.read.option("header", true).option("inferSchema", tr
 
 df_testing_data.show(10)
 df_testing_data.printSchema()
+
+val df_predictions_data = spark.read.schema(prediction_schema).json("s3a://covid19-lake/rearc-covid-19-prediction-models/json/county-predictions/*.json")
+
+df_predictions_data.show(10)
+df_predictions_data.printSchema()
 
