@@ -5,8 +5,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{SparkSession, SQLContext}
 import io.delta.tables._
 import org.apache.spark.sql.functions._
+import schemas._
 
-object App {
+object app {
 
   def main(args: Array[String]) : Unit = {
 
@@ -25,19 +26,44 @@ object App {
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
 
-    print("\n" + "====================HERE====================" + "\n")
+    // read and transform cases data
+    val df_cases_data_raw = spark.read
+      .option("header", true)
+      .schema(schemas.cases_schema)
+      .csv("s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/csv/us-counties/*.csv")
 
-    // https://covid19-lake.s3.us-east-2.amazonaws.com/rearc-covid-19-nyt-data-in-usa/json/us-counties/part-00000-333f1f52-c1f9-4870-a29f-d2f09fb8d11c-c000.json
-    val df_cases_data = spark.read.json("s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/json/us-counties/*.json")
-    val df_testing_data = spark.read.option("header", true).option("inferSchema", true).csv("s3a://covid19-lake/rearc-covid-19-testing-data/csv/states_daily/*.csv")
-    val df_predictions_data = spark.read.json("s3a://covid19-lake/rearc-covid-19-prediction-models/json/county-predictions/*.json")
-    val df_county_populations = spark.read.option("header", true).option("inferSchema", true).csv("s3a://covid19-lake/static-datasets/csv/CountyPopulation/*.csv")
+    df_cases_data_raw.show(10)
+    df_cases_data_raw.printSchema()
 
-    df_cases_data.printSchema()
-    df_testing_data.printSchema()
-    df_predictions_data.printSchema()
-    df_county_populations.printSchema()
+    val df_cases_data_final = transformer.transformCasesDf(df_cases_data_raw, spark)
 
+    // read and transform testing data
+    val df_testing_data_raw = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv("s3a://covid19-lake/rearc-covid-19-testing-data/csv/states_daily/*.csv")
+
+    val df_test_data_final = transformer.transformTestsDf(df_testing_data_raw)
+
+
+    // read predictions data
+    val df_predictions_data_final = spark.read
+      .schema(schemas.prediction_schema)
+      .json("s3a://covid19-lake/rearc-covid-19-prediction-models/json/county-predictions/*.json")
+
+
+    //read populations data
+    val df_county_populations_final = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv("s3a://covid19-lake/static-datasets/csv/CountyPopulation/*.csv")
+
+
+    df_cases_data_final.printSchema()
+    df_cases_data_final.show(5)
+
+    df_test_data_final.printSchema()
+    df_test_data_final.show(5)
 
 
   }
