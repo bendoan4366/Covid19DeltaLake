@@ -29,7 +29,7 @@ object app {
     // read and transform cases data
     val df_cases_data_raw = spark.read
       .option("header", true)
-      .schema(schemas.cases_schema)
+        .schema(schemas.cases_schema)
       .csv("s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/csv/us-counties/*.csv")
 
     df_cases_data_raw.show(10)
