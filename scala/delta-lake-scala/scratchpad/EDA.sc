@@ -54,7 +54,7 @@ df_cases_data.printSchema()
 df_cases_data.show(10)
 
 
-
+/*
 val df_testing_data = spark.read.option("header", true).option("inferSchema", true).csv("s3a://covid19-lake/rearc-covid-19-testing-data/csv/states_daily/*.csv")
 
 val df_testing_data_final = df_testing_data
@@ -73,19 +73,26 @@ df_predictions_data.printSchema()
 
 
 
+ */
+ */
+ */
 
 spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/PovertyEstimates.csv")
 spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/Education.csv")
-spark.sparkContext.addFile("https://www.bls.gov/web/metro/laucntycur14.txt")
+spark.sparkContext.addFile("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
 
-val poverty_estimate_data = spark.read.option("header", true).csv(SparkFiles.get("PovertyEstimates.csv"))
-val education_estimate_data = spark.read.option("header", true).csv(SparkFiles.get("Education.csv"))
+val poverty_estimate_data = spark.read.option("header", true).option("inferSchema", true).csv(SparkFiles.get("PovertyEstimates.csv"))
+val education_estimate_data = spark.read.option("header", true).option("inferSchema", true).csv(SparkFiles.get("Education.csv"))
+val polling_data = spark.read.option("header", true).option("inferSchema", true).csv(SparkFiles.get("president_polls.csv"))
 
-//poverty_estimate_data.printSchema()
-//poverty_estimate_data.show(10)
 
-//education_estimate_data.printSchema()
-//education_estimate_data.show(10)
+poverty_estimate_data.printSchema()
+poverty_estimate_data.show(10)
 
+education_estimate_data.printSchema()
+education_estimate_data.show(10)
+
+polling_data.printSchema()
+polling_data.show(10)
 //https://www.bls.gov/web/metro/laucntycur14.zip
 //https://www.bls.gov/web/metro/laucntycur14.txt

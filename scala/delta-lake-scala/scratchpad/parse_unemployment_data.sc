@@ -30,7 +30,7 @@ trash_rows(5)
 trash_rows(6)
 
 val da = unemployment_text.mapPartitionsWithIndex{ (id_x, iter) => if (id_x == 0) iter.drop(6) else iter }
-val rowRdd: RDD[Row] = da.map(x=>Row(x(0), x(1)))
+val rowRdd = da.map(x=>x.split("|"))
 
 val schema = StructType(
   List(
@@ -40,4 +40,5 @@ val schema = StructType(
 )
 
 val dataFrame_new: DataFrame = spark.createDataFrame(rowRdd, schema)
-
+dataFrame_new.show(10)
+dataFrame_new.printSchema()
