@@ -1,13 +1,13 @@
 package org.knd
 
 import scala.util.Properties
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{SparkSession, SQLContext}
+import org.apache.spark.{SparkConf, SparkContext, SparkFiles}
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import io.delta.tables._
 import org.apache.spark.sql.functions._
 import schemas._
 
-object app {
+object load_delta {
 
   def main(args: Array[String]) : Unit = {
 
@@ -26,16 +26,15 @@ object app {
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
 
+
     // read and transform cases data
     val df_cases_data_raw = spark.read
       .option("header", true)
         .schema(schemas.cases_schema)
       .csv("s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/csv/us-counties/*.csv")
 
-    df_cases_data_raw.show(10)
-    df_cases_data_raw.printSchema()
-
     val df_cases_data_final = transformer.transformCasesDf(df_cases_data_raw, spark)
+
 
     // read and transform testing data
     val df_testing_data_raw = spark.read
@@ -59,11 +58,28 @@ object app {
       .csv("s3a://covid19-lake/static-datasets/csv/CountyPopulation/*.csv")
 
 
-    df_cases_data_final.printSchema()
-    df_cases_data_final.show(5)
+    //read poverty data
+    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/*/PovertyEstimates.csv")
+    val df_poverty_estimate_data_final = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv(SparkFiles.get("PovertyEstimates.csv"))
 
-    df_test_data_final.printSchema()
-    df_test_data_final.show(5)
+
+    //read education level data
+    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/*/Education.csv")
+    val df_education_estimate_data_final = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv(SparkFiles.get("Education.csv"))
+
+
+    //read polling data
+    spark.sparkContext.addFile("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
+    val polling_data = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv(SparkFiles.get("president_polls.csv"))
 
 
   }
