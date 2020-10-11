@@ -59,7 +59,7 @@ object load_delta {
 
 
     //read poverty data
-    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/*/PovertyEstimates.csv")
+    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/PovertyEstimates.csv")
     val df_poverty_estimate_data_final = spark.read
       .option("header", true)
       .option("inferSchema", true)
@@ -67,7 +67,7 @@ object load_delta {
 
 
     //read education level data
-    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/*/Education.csv")
+    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/Education.csv")
     val df_education_estimate_data_final = spark.read
       .option("header", true)
       .option("inferSchema", true)
@@ -76,10 +76,18 @@ object load_delta {
 
     //read polling data
     spark.sparkContext.addFile("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
-    val polling_data = spark.read
+    val df_polling_data_raw = spark.read
       .option("header", true)
       .option("inferSchema", true)
       .csv(SparkFiles.get("president_polls.csv"))
+
+    val df_polling_data_final = transformer.transformPollDf(df_polling_data_raw)
+
+    df_poverty_estimate_data_final.printSchema()
+    df_education_estimate_data_final.printSchema()
+    df_polling_data_final.printSchema()
+    df_polling_data_final.show(10)
+
 
 
   }
