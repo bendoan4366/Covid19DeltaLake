@@ -1,6 +1,6 @@
-package org.knd
+package org.knd.helpers
 
-import org.apache.spark.sql.types.{DateType, DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types._
 
 object schemas {
 
