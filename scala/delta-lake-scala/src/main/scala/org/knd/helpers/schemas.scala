@@ -26,4 +26,16 @@ object schemas {
     )
   )
 
+
+  val poverty_schema = StructType(
+    List(
+      StructField("countyfips", DateType),
+      StructField("countyname", StringType),
+      StructField("predicted_date", DateType),
+      StructField("predicted_deaths", DoubleType),
+      StructField("severity_county_5-day", DoubleType),
+      StructField("statename", StringType)
+    )
+  )
+
 }
