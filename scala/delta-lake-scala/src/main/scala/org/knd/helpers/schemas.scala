@@ -4,6 +4,16 @@ import org.apache.spark.sql.types._
 
 object schemas {
 
+  val table_URLS = Map(
+    "cases_table" -> "s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/csv/us-counties/*.csv",
+    "tests_table" -> "s3a://covid19-lake/rearc-covid-19-testing-data/csv/states_daily/*.csv",
+    "predictions_table" -> "s3a://covid19-lake/rearc-covid-19-prediction-models/json/county-predictions/*.json",
+    "populations_table" -> "s3a://covid19-lake/static-datasets/csv/CountyPopulation/*.csv",
+    "poverty_table" -> "https://www.ers.usda.gov/webdocs/DataFiles/48747/PovertyEstimates.csv",
+    "education_table" -> "https://www.ers.usda.gov/webdocs/DataFiles/48747/Education.csv",
+    "education_table" -> "https://projects.fivethirtyeight.com/polls-page/president_polls.csv"
+  )
+
   val cases_schema = StructType(
     List(
       StructField("date", DateType),
