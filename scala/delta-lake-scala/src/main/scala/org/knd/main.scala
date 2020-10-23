@@ -1,14 +1,17 @@
 package org.knd
 import org.knd.helpers.read_tables._
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.knd.helpers.read_tables
+
+import scala.::
+import scala.collection.mutable
 
 
 object main {
 
   def main(args: Array[String]) : Unit = {
 
-    val spark = SparkSession
+      val spark = SparkSession
       .builder()
       .appName("covid-delta-lake")
       .master("local")
@@ -16,12 +19,12 @@ object main {
       .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
       .getOrCreate()
 
-    val aws_access_key = scala.util.Properties.envOrElse("AWS_ACCESS_KEY", "notAvailable" )
-    val aws_secret = scala.util.Properties.envOrElse("AWS_SECRET_ACCESS_KEY_ID", "notAvailable" )
+  val aws_access_key = scala.util.Properties.envOrElse("AWS_ACCESS_KEY", "notAvailable" )
+  val aws_secret = scala.util.Properties.envOrElse("AWS_SECRET_ACCESS_KEY_ID", "notAvailable" )
 
-    spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", aws_access_key)
-    spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
-    spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
+  spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", aws_access_key)
+  spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
+  spark.sparkContext.hadoopConfiguration.set("fs.s3a.endpoint", "s3.amazonaws.com")
 
   //read tables from various sources
   val cases_table = read_tables.read_cases_table(spark)
@@ -31,6 +34,9 @@ object main {
   val education_estimates_table = read_tables.read_tests_table(spark)
   val poverty_estimates_table = read_tables.read_poverty_table(spark)
   val populations_table = read_tables.read_populations_table(spark)
+
+  val dfs = List(cases_table, tests_table, predictons_table, polls_table, education_estimates_table, populations_table)
+
 
   //write tables to s3 in delta table format
   cases_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/cases/")
