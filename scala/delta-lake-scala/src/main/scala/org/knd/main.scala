@@ -39,6 +39,7 @@ object main {
 
     val aws_access_key = scala.util.Properties.envOrElse("AWS_ACCESS_KEY", "notAvailable" )
     val aws_secret = scala.util.Properties.envOrElse("AWS_SECRET_ACCESS_KEY_ID", "notAvailable" )
+    val delta_lake_bucket = scala.util.Properties.envOrElse("delta_lake_write_path", "notAvailable" )
 
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", aws_access_key)
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)
@@ -57,13 +58,13 @@ object main {
 
 
     //write tables to s3 in delta table format
-    cases_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/cases/")
-    tests_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/tests/")
-    predictons_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/predictions/")
-    polls_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/polls/")
-    education_estimates_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/education/")
-    poverty_estimates_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/poverty/")
-    populations_table.write.format("delta").mode("overwrite").save("s3a://covid-delta-lake/populations/")
+    cases_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "cases/")
+    tests_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "tests/")
+    predictons_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "predictions/")
+    polls_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "polls/")
+    education_estimates_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "education/")
+    poverty_estimates_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "poverty/")
+    populations_table.write.format("delta").mode("overwrite").save(delta_lake_bucket + "populations/")
 
     }
 
