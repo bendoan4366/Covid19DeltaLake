@@ -1,8 +1,7 @@
 package org.knd
-import java.io.FileNotFoundException
-import java.util.Properties
-
 import com.typesafe.config.ConfigFactory
+import scala.util.Properties
+
 import org.knd.helpers.read_tables._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.knd.helpers.read_tables
@@ -11,8 +10,6 @@ import scala.::
 import scala.collection.mutable
 import scala.io.Source
 import scala.reflect.io.File
-
-
 
 object main {
 
@@ -26,20 +23,9 @@ object main {
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
     .getOrCreate()
 
-    val url = getClass.getResource("static_files/delta_lake_config.properties")
-    val properties: Properties = new Properties()
-
-    if (url != null) {
-      val source = Source.fromURL(url)
-      properties.load(source.bufferedReader())
-    }
-    else {
-      throw new FileNotFoundException("Properties file cannot be loaded");
-    }
-
-    val aws_access_key = scala.util.Properties.envOrElse("AWS_ACCESS_KEY", "notAvailable" )
-    val aws_secret = scala.util.Properties.envOrElse("AWS_SECRET_ACCESS_KEY_ID", "notAvailable" )
-    val delta_lake_bucket = scala.util.Properties.envOrElse("delta_lake_write_path", "notAvailable" )
+    val aws_access_key = ConfigFactory.load("delta_properties.conf").getString("delta.aws.aws_access_key")
+    val aws_secret = ConfigFactory.load("delta_properties.conf").getString("delta.aws.aws_secret")
+    val delta_lake_bucket = ConfigFactory.load("delta_properties.conf").getString("delta.aws.url")
 
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.access.key", aws_access_key)
     spark.sparkContext.hadoopConfiguration.set("fs.s3a.secret.key", aws_secret)

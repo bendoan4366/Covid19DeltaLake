@@ -18,7 +18,7 @@ object read_tables {
 
     val state_abbr_mappings = spark.read
       .option("header", true)
-      .csv("../delta-lake-scala/src/main/scala/static_files/state_mappings.csv")
+      .csv("../delta-lake-scala/src/main/scala/org.knd.static_files/state_mappings.csv")
       .select("State", "Code")
       .withColumnRenamed("State", "source_state")
 
