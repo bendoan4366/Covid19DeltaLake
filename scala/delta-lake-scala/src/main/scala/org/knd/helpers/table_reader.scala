@@ -5,8 +5,7 @@ import org.apache.spark.sql.functions.{to_date, to_timestamp}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-object read_tables {
-
+object table_reader {
 
   // read and transform cases data
   def read_cases_table(spark: SparkSession): DataFrame = {
