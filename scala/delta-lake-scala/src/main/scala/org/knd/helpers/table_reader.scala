@@ -13,11 +13,11 @@ object table_reader {
     val df_cases_data_raw = spark.read
       .option("header", true)
       .schema(schemas.cases_schema)
-      .csv("s3a://covid19-lake/rearc-covid-19-nyt-data-in-usa/csv/us-counties/*.csv")
+      .csv(schemas.datasource_URLS("cases_table"))
 
     val state_abbr_mappings = spark.read
       .option("header", true)
-      .csv("../delta-lake-scala/src/main/scala/org.knd.static_files/state_mappings.csv")
+      .csv("../delta-lake-scala/src/main/scala/org/knd/static_files/state_mappings.csv")
       .select("State", "Code")
       .withColumnRenamed("State", "source_state")
 
@@ -33,7 +33,7 @@ object table_reader {
     val df_testing_data_raw = spark.read
       .option("header", true)
       .option("inferSchema", true)
-      .csv("s3a://covid19-lake/rearc-covid-19-testing-data/csv/states_daily/*.csv")
+      .csv(schemas.datasource_URLS("tests_table"))
 
     val df_test_data_final = df_testing_data_raw
       .withColumn("date", to_date(df_testing_data_raw("date").cast(StringType), "yyyyMMdd"))
@@ -49,7 +49,7 @@ object table_reader {
 
     val df_predictions_data_final = spark.read
     .schema (schemas.prediction_schema)
-    .json ("s3a://covid19-lake/rearc-covid-19-prediction-models/json/county-predictions/*.json")
+    .json (schemas.datasource_URLS("predictions_table"))
 
     return df_predictions_data_final
   }
@@ -61,7 +61,7 @@ object table_reader {
     val df_county_populations_raw = spark.read
       .option("header", true)
       .option("inferSchema", true)
-      .csv("s3a://covid19-lake/static-datasets/csv/CountyPopulation/*.csv")
+      .csv(schemas.datasource_URLS("populations_table"))
 
     val df_county_populations_final = df_county_populations_raw
       .withColumnRenamed("Population Estimate 2018","population_estimate_2018")
@@ -76,7 +76,7 @@ object table_reader {
     spark.sql("set spark.sql.legacy.timeParserPolicy=LEGACY")
     spark.sql("set spark.sql.legacy.parquet.datetimeRebaseModeInWrite=LEGACY")
 
-    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/PovertyEstimates.csv")
+    spark.sparkContext.addFile(schemas.datasource_URLS("poverty_table"))
     val df_poverty_estimate_data_raw = spark.read
       .option("header", true)
       .option("inferSchema", true)
@@ -96,7 +96,7 @@ object table_reader {
     spark.sql("set spark.sql.legacy.timeParserPolicy=LEGACY")
     spark.sql("set spark.sql.legacy.parquet.datetimeRebaseModeInWrite=LEGACY")
 
-    spark.sparkContext.addFile("https://www.ers.usda.gov/webdocs/DataFiles/48747/Education.csv")
+    spark.sparkContext.addFile(schemas.datasource_URLS("education_table"))
     val df_education_estimate_data_raw = spark.read
       .option("header", true)
       .option("inferSchema", true)
@@ -114,7 +114,7 @@ object table_reader {
 
     spark.sql("set spark.sql.legacy.timeParserPolicy=LEGACY")
     spark.sql("set spark.sql.legacy.parquet.datetimeRebaseModeInWrite=LEGACY")
-    spark.sparkContext.addFile("https://projects.fivethirtyeight.com/polls-page/president_polls.csv")
+    spark.sparkContext.addFile(schemas.datasource_URLS("polling_table"))
 
     val df_polling_data_raw = spark.read
       .option("header", true)
@@ -132,6 +132,18 @@ object table_reader {
 
     return df_polling_data_final
 
+  }
+
+  def read_demographic_data(spark: SparkSession): DataFrame = {
+
+    spark.sparkContext.addFile(schemas.datasource_URLS("demographic_table"))
+
+    val df_demographic_data = spark.read
+      .option("header", true)
+      .option("inferSchema", true)
+      .csv(SparkFiles.get("cc-est2019-alldata.csv"))
+
+    return df_demographic_data
   }
 
 }
